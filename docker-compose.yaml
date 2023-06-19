@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  iam-wallet:
+    container_name: iam-wallet
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: wallet:latest-local
+    ports:
+      - "80:80"
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - iam-wallet-db
+    networks:
+      - iam-wallet
+
+  iam-wallet-db:
+    container_name: iam-wallet-db
+    image: 'postgres:14-alpine3.17'
+    ports:
+      - '15432:5432'
+    env_file:
+      - .env
+    networks:
+      - iam-wallet
+    environment:
+      - POSTGRES_USERNAME=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_DATABASE=${DB_DATABASE}
+    volumes:
+      - nps_data:/var/lib/postgresql/data
+volumes:
+    nps_data: {}
+networks:
+  iam-wallet:
